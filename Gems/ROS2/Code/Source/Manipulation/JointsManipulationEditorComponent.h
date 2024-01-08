@@ -13,6 +13,8 @@
 #include <AzToolsFramework/ToolsComponents/EditorComponentBase.h>
 #include <ROS2/Communication/PublisherConfiguration.h>
 
+#include <AzCore/Component/TransformBus.h>
+
 namespace ROS2
 {
     //! Editor Component responsible for a hierarchical system of joints such as robotic arm with Articulations or Hinge Joints.
@@ -29,10 +31,19 @@ namespace ROS2
         static void Reflect(AZ::ReflectContext* context);
 
         // AzToolsFramework::Components::EditorComponentBase overrides
+        void Activate() override;
+        void Deactivate() override;
         void BuildGameEntity(AZ::Entity* gameEntity) override;
 
     private:
         PublisherConfiguration m_jointStatePublisherConfiguration;
-        AZStd::unordered_map<AZStd::string, float> m_initialPositions;
+        AZStd::vector<AZStd::pair<AZStd::string, float>> m_initialPositions;
+        AZStd::string m_positionCommandTopic = "/position_controller/commands";
+        AZ::ChildChangedEvent::Handler m_childChangedHandler;
+        AZStd::vector<AZStd::string> m_childrenJointNames; //TODO AZStd::vector<AZStd::string_view> ?
+        AZStd::vector<AZStd::string> m_childrenEntityNames;
+
+        void OnChildChanged(AZ::ChildChangeType type, AZ::EntityId child);
+        void recursiveGetFrameChildren(const AZ::EntityId& frameEntityId);
     };
 } // namespace ROS2
