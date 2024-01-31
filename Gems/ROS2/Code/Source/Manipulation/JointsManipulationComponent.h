@@ -14,9 +14,7 @@
 #include <AzCore/Name/Name.h>
 
 #include "JointStatePublisher.h"
-#include "std_msgs/msg/float64_multi_array.hpp"
 #include <ROS2/Manipulation/JointsManipulationRequests.h>
-#include <rclcpp/subscription.hpp>
 
 namespace ROS2
 {
@@ -30,10 +28,7 @@ namespace ROS2
     public:
         JointsManipulationComponent();
         JointsManipulationComponent(
-            const PublisherConfiguration& configuration,
-            const AZStd::vector<AZStd::pair<AZStd::string, JointPosition>>& initialPositions,
-            const AZStd::string& positionCommandZTopic
-        );
+            const PublisherConfiguration& configuration, const AZStd::unordered_map<AZStd::string, JointPosition>& initialPositions);
         ~JointsManipulationComponent() = default;
         AZ_COMPONENT(JointsManipulationComponent, "{3da9abfc-0028-4e3e-8d04-4e4440d2e319}", AZ::Component);
 
@@ -75,7 +70,6 @@ namespace ROS2
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
 
         void MoveToSetPositions(float deltaTime);
-        void PositionCommandCallback(std_msgs::msg::Float64MultiArray command);
 
         AZStd::string GetManipulatorNamespace() const;
 
@@ -86,10 +80,7 @@ namespace ROS2
         AZStd::unique_ptr<JointStatePublisher> m_jointStatePublisher;
         PublisherConfiguration m_jointStatePublisherConfiguration;
         ManipulationJoints m_manipulationJoints; //!< Map of JointInfo where the key is a joint name (with namespace included)
-        AZStd::vector<AZStd::pair<AZStd::string, JointPosition>>
-            m_initialPositions; //!< Initial positions where the first value of each pair is joint name (without namespace included)
-        //TODO std ????
-        std::shared_ptr<rclcpp::Subscription<std_msgs::msg::Float64MultiArray>> m_jointPositionSubscriber;
-        AZStd::string m_positionCommandTopic;
+        AZStd::unordered_map<AZStd::string, JointPosition>
+            m_initialPositions; //!< Initial positions where the key is joint name (without namespace included)
     };
 } // namespace ROS2
